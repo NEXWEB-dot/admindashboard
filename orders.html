@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Customer Orders — ANRAF Admin</title>
+  <link rel="stylesheet" href="/admin/css/admin.css">
+  <style>
+    .admin-container { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; }
+    .admin-nav { display: flex; gap: 1.5rem; border-bottom: 1px solid var(--color-border); padding-bottom: 1rem; margin-bottom: 2rem; }
+    .admin-nav a { font-weight: 500; font-size: 0.95rem; }
+    .admin-nav a.active { color: var(--color-gold-dark); border-bottom: 2px solid var(--color-gold); padding-bottom: 4px; }
+    .filter-tabs { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; overflow-x: auto; padding-bottom: 0.5rem; }
+    .tab-btn { background: var(--color-cream); border: 1px solid var(--color-border); padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.85rem; cursor: pointer; white-space: nowrap; }
+    .tab-btn.active { background: var(--color-near-black); color: #fff; border-color: var(--color-near-black); }
+    table { width: 100%; border-collapse: collapse; text-align: left; }
+    th, td { padding: 0.85rem 1rem; border-bottom: 1px solid var(--color-border-light); font-size: 0.9rem; }
+    th { background: var(--color-cream); font-weight: 500; }
+    .badge { padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; }
+    .badge-pending { background: #e0eafb; color: #1e4e8c; }
+    .badge-confirmed { background: #e8f5ee; color: #2e7d4f; }
+    .badge-shipped { background: #e0f2fe; color: #0369a1; }
+    .badge-delivered { background: #f3f4f6; color: #374151; }
+    .badge-cancelled { background: #fee2e2; color: #b91c1c; }
+  </style>
+</head>
+<body>
+  <div class="admin-container">
+    <header style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 1.5rem;">
+      <h1 style="font-family: var(--font-serif); font-size: 2rem;">Orders</h1>
+      <a href="/store.html" target="_blank" style="font-size: 0.85rem; text-decoration: underline;">View Live Store ↗</a>
+    </header>
+
+    <nav class="admin-nav">
+      <a href="/admin/index.html">Overview</a>
+      <a href="/admin/products.html">Products</a>
+      <a href="/admin/orders.html" class="active">Orders</a>
+    </nav>
+
+    <div id="status-banner"></div>
+
+    <div class="filter-tabs">
+      <button class="tab-btn active" data-status="">All Orders</button>
+      <button class="tab-btn" data-status="pending">Pending</button>
+      <button class="tab-btn" data-status="confirmed">Confirmed</button>
+      <button class="tab-btn" data-status="shipped">Shipped</button>
+      <button class="tab-btn" data-status="delivered">Delivered</button>
+      <button class="tab-btn" data-status="cancelled">Cancelled</button>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Order #</th>
+          <th>Date</th>
+          <th>Customer</th>
+          <th>Phone</th>
+          <th>Total</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="orders-tbody">
+        <tr><td colspan="7" style="text-align: center; color: var(--color-muted);">Loading orders…</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <script type="module">
+    import { api, initStatusBanner, toast, formatPrice } from '/admin/js/api.js';
+
+    initStatusBanner();
+
+    let currentStatus = '';
+
+    async function loadOrders() {
+      const tbody = document.getElementById('orders-tbody');
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--color-muted);">Loading…</td></tr>';
+
+      try {
+        const res = await api.orders.list(currentStatus ? { status: currentStatus } : {});
+        const orders = res.orders || [];
+
+        tbody.innerHTML = '';
+        if (!orders.length) {
+          tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--color-muted); padding: 2rem;">No orders found.</td></tr>';
+          return;
+        }
+
+        for (const o of orders) {
+          const tr = document.createElement('tr');
+
+          const tdNum = document.createElement('td');
+          tdNum.textContent = o.order_number ? `#${o.order_number}` : (o.client_ref ? o.client_ref.slice(0, 8) : 'Offline');
+          if (o._source === 'offline') {
+            const badge = document.createElement('small');
+            badge.textContent = ' (offline)';
+            badge.style.color = '#a05c00';
+            tdNum.appendChild(badge);
+          }
+          tr.appendChild(tdNum);
+
+          const tdDate = document.createElement('td');
+          tdDate.textContent = o.created_at ? new Date(o.created_at).toLocaleDateString('en-GB') : '—';
+          tr.appendChild(tdDate);
+
+          const tdCust = document.createElement('td');
+          tdCust.textContent = o.customer_name || o.name || '—';
+          tr.appendChild(tdCust);
+
+          const tdPhone = document.createElement('td');
+          tdPhone.textContent = o.customer_phone || o.phone || '—';
+          tr.appendChild(tdPhone);
+
+          const tdTotal = document.createElement('td');
+          tdTotal.textContent = formatPrice(o.total);
+          tr.appendChild(tdTotal);
+
+          const tdStatus = document.createElement('td');
+          const span = document.createElement('span');
+          const st = o.status || 'pending';
+          span.className = `badge badge-${st}`;
+          span.textContent = st;
+          tdStatus.appendChild(span);
+          tr.appendChild(tdStatus);
+
+          const tdAction = document.createElement('td');
+          const a = document.createElement('a');
+          a.href = `/admin/order.html?id=${o.id || o.client_ref}`;
+          a.textContent = 'View Details';
+          a.style.textDecoration = 'underline';
+          tdAction.appendChild(a);
+          tr.appendChild(tdAction);
+
+          tbody.appendChild(tr);
+        }
+      } catch (e) {
+        toast(`Failed to load orders: ${e.message}`, 'error');
+      }
+    }
+
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentStatus = btn.dataset.status;
+        loadOrders();
+      });
+    });
+
+    loadOrders();
+  </script>
+</body>
+</html>

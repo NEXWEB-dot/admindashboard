@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order Detail — ANRAF Admin</title>
+  <link rel="stylesheet" href="/admin/css/admin.css">
+  <style>
+    .admin-container { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem; }
+    .order-grid { display: grid; grid-template-columns: 1fr; gap: 2rem; margin-top: 1.5rem; }
+    @media (min-width: 768px) {
+      .order-grid { grid-template-columns: 2fr 1.2fr; }
+    }
+    .panel { background: var(--color-cream); border: 1px solid var(--color-border-light); padding: 1.5rem; border-radius: 4px; margin-bottom: 1.5rem; }
+    .panel h2 { font-family: var(--font-serif); font-size: 1.3rem; margin-bottom: 1rem; border-bottom: 1px solid var(--color-border); padding-bottom: 0.5rem; }
+    .meta-row { display: flex; justify-content: space-between; margin-bottom: 0.75rem; font-size: 0.9rem; }
+    .meta-label { color: var(--color-muted); }
+    .meta-val { font-weight: 500; }
+    .status-actions { display: flex; flex-direction: column; gap: 0.75rem; margin-top: 1.5rem; }
+    .btn { padding: 0.75rem 1.25rem; border-radius: 3px; font-size: 0.85rem; font-weight: 500; cursor: pointer; text-transform: uppercase; letter-spacing: 0.05em; border: none; text-align: center; }
+    .btn-confirm { background: #2e7d4f; color: #fff; }
+    .btn-ship { background: #0369a1; color: #fff; }
+    .btn-deliver { background: #1a1a18; color: #fff; }
+    .btn-cancel { background: #b91c1c; color: #fff; }
+    .btn-wa { background: #25D366; color: #fff; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; margin-top: 0.5rem; text-decoration: none; }
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    th, td { padding: 0.75rem 0.5rem; border-bottom: 1px solid var(--color-border); font-size: 0.9rem; text-align: left; }
+  </style>
+</head>
+<body>
+  <div class="admin-container">
+    <a href="/admin/orders.html" style="font-size: 0.85rem; text-decoration: underline; margin-bottom: 1rem; display: inline-block;">← Back to Orders</a>
+    <h1 id="order-heading" style="font-family: var(--font-serif); font-size: 2rem;">Order Details</h1>
+
+    <div id="status-banner"></div>
+
+    <div class="order-grid">
+      <div>
+        <div class="panel">
+          <h2>Items Ordered</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th>Qty</th>
+                <th>Price</th>
+                <th style="text-align: right;">Total</th>
+              </tr>
+            </thead>
+            <tbody id="items-tbody">
+              <tr><td colspan="4" style="text-align: center;">Loading items…</td></tr>
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="3" style="text-align: right; font-weight: 600; padding-top: 1rem;">Total Amount:</td>
+                <td id="order-total" style="text-align: right; font-weight: 600; padding-top: 1rem;">—</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <div class="panel">
+          <h2>Order Notes</h2>
+          <p id="order-notes" style="font-size: 0.95rem; color: #4a4a46; font-style: italic;">No notes provided.</p>
+        </div>
+      </div>
+
+      <div>
+        <div class="panel">
+          <h2>Customer Details</h2>
+          <div class="meta-row">
+            <span class="meta-label">Customer:</span>
+            <span class="meta-val" id="cust-name">—</span>
+          </div>
+          <div class="meta-row">
+            <span class="meta-label">Phone:</span>
+            <span class="meta-val" id="cust-phone">—</span>
+          </div>
+          <div class="meta-row" style="flex-direction: column; gap: 0.25rem;">
+            <span class="meta-label">Address:</span>
+            <span class="meta-val" id="cust-addr" style="line-height: 1.4;">—</span>
+          </div>
+          <a id="wa-btn" href="#" target="_blank" class="btn btn-wa">Open WhatsApp Chat</a>
+        </div>
+
+        <div class="panel">
+          <h2>Order Status & Workflow</h2>
+          <div class="meta-row">
+            <span class="meta-label">Current Status:</span>
+            <span class="meta-val" id="current-status" style="text-transform: uppercase;">—</span>
+          </div>
+          <div id="workflow-buttons" class="status-actions">
+            <!-- Buttons rendered based on status transitions -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { api, initStatusBanner, toast, confirm, formatPrice } from '/admin/js/api.js';
+
+    initStatusBanner();
+
+    const orderId = new URLSearchParams(location.search).get('id');
+    let currentOrder = null;
+
+    async function loadOrder() {
+      if (!orderId) { window.location.href = '/admin/orders.html'; return; }
+      try {
+        const res = await api.orders.list();
+        const orders = res.orders || [];
+        currentOrder = orders.find(o => o.id === orderId || o.client_ref === orderId);
+
+        if (!currentOrder) throw new Error('Order not found');
+
+        const orderNum = currentOrder.order_number ? `#${currentOrder.order_number}` : currentOrder.client_ref.slice(0, 8);
+        document.getElementById('order-heading').textContent = `Order ${orderNum}`;
+
+        document.getElementById('cust-name').textContent = currentOrder.customer_name || currentOrder.name || '—';
+        const phone = currentOrder.customer_phone || currentOrder.phone || '';
+        document.getElementById('cust-phone').textContent = phone || '—';
+        document.getElementById('cust-addr').textContent = currentOrder.customer_address || currentOrder.address || '—';
+        document.getElementById('order-notes').textContent = currentOrder.notes || 'No customer notes.';
+        document.getElementById('order-total').textContent = formatPrice(currentOrder.total);
+
+        const waPhone = phone.replace(/[^0-9]/g, '');
+        document.getElementById('wa-btn').href = `https://wa.me/${waPhone}?text=${encodeURIComponent(`Salam, confirming your ANRAF Studio order ${orderNum}`)}`;
+
+        document.getElementById('current-status').textContent = currentOrder.status || 'pending';
+
+        // Render items
+        const tbody = document.getElementById('items-tbody');
+        tbody.innerHTML = '';
+        const items = currentOrder.order_items || currentOrder.items || [];
+        for (const it of items) {
+          const tr = document.createElement('tr');
+          const name = it.product_name || it.name || 'Unknown item';
+          const qty = it.quantity || it.qty || 1;
+          const price = it.price_at_purchase || it.price || 0;
+
+          tr.innerHTML = `
+            <td>${name}</td>
+            <td>${qty}</td>
+            <td>${formatPrice(price)}</td>
+            <td style="text-align: right;">${formatPrice(price * qty)}</td>
+          `;
+          tbody.appendChild(tr);
+        }
+
+        renderWorkflow();
+      } catch (e) {
+        toast(`Error loading order: ${e.message}`, 'error');
+      }
+    }
+
+    function renderWorkflow() {
+      const container = document.getElementById('workflow-buttons');
+      container.innerHTML = '';
+
+      if (currentOrder._source === 'offline') {
+        const p = document.createElement('p');
+        p.textContent = 'This order was captured in offline reserve. Status changes will be unlocked once replayed into the database.';
+        p.style.fontSize = '0.85rem';
+        p.style.color = '#a05c00';
+        container.appendChild(p);
+        return;
+      }
+
+      const st = currentOrder.status || 'pending';
+
+      if (st === 'pending') {
+        createBtn('Confirm Order', 'btn-confirm', () => updateStatus('confirmed'));
+        createBtn('Cancel Order', 'btn-cancel', () => updateStatus('cancelled', true));
+      } else if (st === 'confirmed') {
+        createBtn('Mark as Shipped', 'btn-ship', () => updateStatus('shipped'));
+        createBtn('Cancel Order', 'btn-cancel', () => updateStatus('cancelled', true));
+      } else if (st === 'shipped') {
+        createBtn('Mark as Delivered', 'btn-deliver', () => updateStatus('delivered'));
+        createBtn('Cancel Order', 'btn-cancel', () => updateStatus('cancelled', true));
+      } else {
+        const p = document.createElement('p');
+        p.textContent = `Order is ${st}. No further status transitions allowed.`;
+        p.style.fontSize = '0.85rem';
+        p.style.color = '#787870';
+        container.appendChild(p);
+      }
+    }
+
+    function createBtn(text, className, onClick) {
+      const container = document.getElementById('workflow-buttons');
+      const b = document.createElement('button');
+      b.className = `btn ${className}`;
+      b.textContent = text;
+      b.addEventListener('click', onClick);
+      container.appendChild(b);
+    }
+
+    async function updateStatus(newStatus, isCancel = false) {
+      if (isCancel) {
+        const ok = await confirm('Cancelling this order will release and restore tracked product inventory. Are you sure?');
+        if (!ok) return;
+      }
+
+      try {
+        await api.orders.setStatus(currentOrder.id, newStatus);
+        toast(`Order status updated to ${newStatus}`, 'success');
+        loadOrder();
+      } catch (err) {
+        toast(`Status update failed: ${err.message}`, 'error');
+      }
+    }
+
+    loadOrder();
+  </script>
+</body>
+</html>

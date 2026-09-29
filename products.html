@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Products — ANRAF Admin</title>
+  <link rel="stylesheet" href="/admin/css/admin.css">
+  <style>
+    .admin-container { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; }
+    .admin-nav { display: flex; gap: 1.5rem; border-bottom: 1px solid var(--color-border); padding-bottom: 1rem; margin-bottom: 2rem; }
+    .admin-nav a { font-weight: 500; font-size: 0.95rem; }
+    .admin-nav a.active { color: var(--color-gold-dark); border-bottom: 2px solid var(--color-gold); padding-bottom: 4px; }
+    .top-actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; gap: 1rem; flex-wrap: wrap; }
+    .search-box { flex: 1; max-width: 400px; }
+    .search-box input { width: 100%; padding: 0.6rem 1rem; border: 1px solid var(--color-border); border-radius: 4px; }
+    .btn { padding: 0.65rem 1.25rem; border-radius: 3px; font-size: 0.85rem; font-weight: 500; cursor: pointer; text-transform: uppercase; letter-spacing: 0.05em; }
+    .btn-dark { background: var(--color-near-black); color: #fff; border: 1px solid var(--color-near-black); }
+    table { width: 100%; border-collapse: collapse; text-align: left; margin-top: 1rem; }
+    th, td { padding: 0.85rem 1rem; border-bottom: 1px solid var(--color-border-light); font-size: 0.9rem; vertical-align: middle; }
+    th { background: var(--color-cream); font-weight: 500; }
+    .thumb-preview { width: 44px; height: 58px; object-fit: cover; background: #eee; border-radius: 2px; }
+    .badge { padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 500; text-transform: uppercase; }
+    .badge-in-stock { background: #e8f5ee; color: #2e7d4f; }
+    .badge-out-stock { background: #fee2e2; color: #b91c1c; }
+    .badge-active { background: #e0eafb; color: #1e4e8c; }
+    .badge-draft { background: #f0ede6; color: #787870; }
+    .btn-action { background: none; border: none; cursor: pointer; font-size: 0.85rem; text-decoration: underline; margin-right: 0.75rem; }
+    .btn-delete { color: #b91c1c; }
+  </style>
+</head>
+<body>
+  <div class="admin-container">
+    <header style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 1.5rem;">
+      <h1 style="font-family: var(--font-serif); font-size: 2rem;">Products Catalog</h1>
+      <a href="/store.html" target="_blank" style="font-size: 0.85rem; text-decoration: underline;">View Live Store ↗</a>
+    </header>
+
+    <nav class="admin-nav">
+      <a href="/admin/index.html">Overview</a>
+      <a href="/admin/products.html" class="active">Products</a>
+      <a href="/admin/orders.html">Orders</a>
+    </nav>
+
+    <div id="status-banner"></div>
+
+    <div class="top-actions">
+      <div class="search-box">
+        <input type="search" id="search-input" placeholder="Search by name, category, or slug…">
+      </div>
+      <a href="/admin/product.html" class="btn btn-dark">+ Add New Product</a>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Image</th>
+          <th>Name</th>
+          <th>Category</th>
+          <th>Price</th>
+          <th>Stock</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="products-tbody">
+        <tr><td colspan="7" style="text-align: center; color: var(--color-muted);">Loading products…</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <script type="module">
+    import { api, initStatusBanner, toast, confirm, formatPrice } from '/admin/js/api.js';
+
+    initStatusBanner();
+
+    let allProducts = [];
+
+    async function loadProducts() {
+      try {
+        const res = await api.products.list();
+        allProducts = res.products || [];
+        render(allProducts);
+      } catch (e) {
+        toast(`Failed to load products: ${e.message}`, 'error');
+      }
+    }
+
+    function render(products) {
+      const tbody = document.getElementById('products-tbody');
+      tbody.innerHTML = '';
+
+      if (!products.length) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = '<td colspan="7" style="text-align: center; color: var(--color-muted); padding: 2rem;">No products found.</td>';
+        tbody.appendChild(tr);
+        return;
+      }
+
+      for (const p of products) {
+        const tr = document.createElement('tr');
+
+        // Thumb
+        const tdImg = document.createElement('td');
+        const img = document.createElement('img');
+        img.className = 'thumb-preview';
+        img.src = p.images?.[0]?.thumb || p.images?.[0]?.url || '/img/placeholder.svg';
+        img.alt = p.name;
+        tdImg.appendChild(img);
+        tr.appendChild(tdImg);
+
+        // Name
+        const tdName = document.createElement('td');
+        const strong = document.createElement('strong');
+        strong.textContent = p.name;
+        strong.style.display = 'block';
+        const slug = document.createElement('small');
+        slug.textContent = p.slug;
+        slug.style.color = '#787870';
+        tdName.appendChild(strong);
+        tdName.appendChild(slug);
+        tr.appendChild(tdName);
+
+        // Category
+        const tdCat = document.createElement('td');
+        tdCat.textContent = p.category || '—';
+        tr.appendChild(tdCat);
+
+        // Price
+        const tdPrice = document.createElement('td');
+        tdPrice.textContent = formatPrice(p.price);
+        tr.appendChild(tdPrice);
+
+        // Stock
+        const tdStock = document.createElement('td');
+        const spanStock = document.createElement('span');
+        spanStock.className = `badge ${p.in_stock ? 'badge-in-stock' : 'badge-out-stock'}`;
+        spanStock.textContent = p.in_stock ? (p.track_stock ? `${p.stock} in stock` : 'In Stock') : 'Sold Out';
+        tdStock.appendChild(spanStock);
+        tr.appendChild(tdStock);
+
+        // Active / Status
+        const tdStatus = document.createElement('td');
+        const spanStatus = document.createElement('span');
+        spanStatus.className = `badge ${p.is_active ? 'badge-active' : 'badge-draft'}`;
+        spanStatus.textContent = p.is_active ? 'Active' : 'Hidden';
+        tdStatus.appendChild(spanStatus);
+        tr.appendChild(tdStatus);
+
+        // Actions
+        const tdActions = document.createElement('td');
+        const editLink = document.createElement('a');
+        editLink.href = `/admin/product.html?id=${p.id}`;
+        editLink.className = 'btn-action';
+        editLink.textContent = 'Edit';
+        tdActions.appendChild(editLink);
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.type = 'button';
+        deleteBtn.className = 'btn-action btn-delete';
+        deleteBtn.textContent = 'Delete';
+        deleteBtn.addEventListener('click', async () => {
+          const ok = await confirm(`Are you sure you want to permanently delete "${p.name}"?`);
+          if (!ok) return;
+
+          try {
+            await api.products.delete(p.id);
+            toast('Product deleted', 'success');
+            loadProducts();
+          } catch (err) {
+            toast(`Delete failed: ${err.message}`, 'error');
+          }
+        });
+        tdActions.appendChild(deleteBtn);
+        tr.appendChild(tdActions);
+
+        tbody.appendChild(tr);
+      }
+    }
+
+    document.getElementById('search-input').addEventListener('input', (e) => {
+      const q = e.target.value.toLowerCase().trim();
+      if (!q) return render(allProducts);
+      const filtered = allProducts.filter(p =>
+        p.name.toLowerCase().includes(q) ||
+        (p.category || '').toLowerCase().includes(q) ||
+        p.slug.toLowerCase().includes(q)
+      );
+      render(filtered);
+    });
+
+    loadProducts();
+  </script>
+</body>
+</html>
