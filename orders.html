@@ -4,78 +4,137 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Customer Orders — ANRAF Admin</title>
-  <link rel="stylesheet" href="/admin/css/admin.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./css/admin.css">
   <style>
-    .admin-container { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; }
-    .admin-nav { display: flex; gap: 1.5rem; border-bottom: 1px solid var(--color-border); padding-bottom: 1rem; margin-bottom: 2rem; }
-    .admin-nav a { font-weight: 500; font-size: 0.95rem; }
-    .admin-nav a.active { color: var(--color-gold-dark); border-bottom: 2px solid var(--color-gold); padding-bottom: 4px; }
-    .filter-tabs { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; overflow-x: auto; padding-bottom: 0.5rem; }
-    .tab-btn { background: var(--color-cream); border: 1px solid var(--color-border); padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.85rem; cursor: pointer; white-space: nowrap; }
+    .filter-tabs { display: flex; gap: var(--space-2); margin-bottom: var(--space-5); overflow-x: auto; padding-bottom: var(--space-2); }
+    .tab-btn { background: var(--color-white); border: 1px solid var(--color-border); padding: 8px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 500; cursor: pointer; white-space: nowrap; transition: var(--transition); }
     .tab-btn.active { background: var(--color-near-black); color: #fff; border-color: var(--color-near-black); }
-    table { width: 100%; border-collapse: collapse; text-align: left; }
-    th, td { padding: 0.85rem 1rem; border-bottom: 1px solid var(--color-border-light); font-size: 0.9rem; }
-    th { background: var(--color-cream); font-weight: 500; }
-    .badge { padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; }
-    .badge-pending { background: #e0eafb; color: #1e4e8c; }
-    .badge-confirmed { background: #e8f5ee; color: #2e7d4f; }
-    .badge-shipped { background: #e0f2fe; color: #0369a1; }
-    .badge-delivered { background: #f3f4f6; color: #374151; }
-    .badge-cancelled { background: #fee2e2; color: #b91c1c; }
+    .badge { display: inline-block; padding: 4px 10px; border-radius: 12px; font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+    .badge-pending { background: var(--status-pending-bg); color: var(--status-pending); }
+    .badge-confirmed { background: var(--status-confirmed-bg); color: var(--status-confirmed); }
+    .badge-shipped { background: var(--status-shipped-bg); color: var(--status-shipped); }
+    .badge-delivered { background: var(--status-delivered-bg); color: var(--status-delivered); }
+    .badge-cancelled { background: var(--status-cancelled-bg); color: var(--status-cancelled); }
   </style>
 </head>
 <body>
-  <div class="admin-container">
-    <header style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 1.5rem;">
-      <h1 style="font-family: var(--font-serif); font-size: 2rem;">Orders</h1>
-      <a href="/store.html" target="_blank" style="font-size: 0.85rem; text-decoration: underline;">View Live Store ↗</a>
-    </header>
+  <!-- Mobile Header -->
+  <header class="admin-header">
+    <button class="hamburger-btn" id="mobile-menu-btn" aria-label="Open Navigation">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <span class="header-title">ANRAF ORDERS</span>
+    <a href="../store.html" target="_blank" class="btn btn-sm btn-secondary" style="margin-left:auto;">Live Store ↗</a>
+  </header>
 
-    <nav class="admin-nav">
-      <a href="/admin/index.html">Overview</a>
-      <a href="/admin/products.html">Products</a>
-      <a href="/admin/orders.html" class="active">Orders</a>
-    </nav>
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
-    <div id="status-banner"></div>
+  <div class="admin-layout">
+    <!-- Sidebar -->
+    <aside class="admin-sidebar" id="admin-sidebar">
+      <div class="sidebar-brand">
+        <span class="sidebar-brand-name">ANRAF</span>
+        <span class="sidebar-brand-sub">Management Suite</span>
+      </div>
 
-    <div class="filter-tabs">
-      <button class="tab-btn active" data-status="">All Orders</button>
-      <button class="tab-btn" data-status="pending">Pending</button>
-      <button class="tab-btn" data-status="confirmed">Confirmed</button>
-      <button class="tab-btn" data-status="shipped">Shipped</button>
-      <button class="tab-btn" data-status="delivered">Delivered</button>
-      <button class="tab-btn" data-status="cancelled">Cancelled</button>
-    </div>
+      <nav class="sidebar-nav">
+        <span class="sidebar-nav-label">Store Control</span>
+        <a href="./index.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Overview
+        </a>
+        <a href="./products.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+          Products
+        </a>
+        <a href="./orders.html" class="sidebar-link active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          Orders
+        </a>
 
-    <table>
-      <thead>
-        <tr>
-          <th>Order #</th>
-          <th>Date</th>
-          <th>Customer</th>
-          <th>Phone</th>
-          <th>Total</th>
-          <th>Status</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody id="orders-tbody">
-        <tr><td colspan="7" style="text-align: center; color: var(--color-muted);">Loading orders…</td></tr>
-      </tbody>
-    </table>
+        <span class="sidebar-nav-label" style="margin-top:1.5rem;">Shortcuts</span>
+        <a href="./product.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add Product
+        </a>
+        <a href="../store.html" target="_blank" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          View Storefront ↗
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        © 2026 ANRAF Studio v2.0
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="admin-main">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Customer Orders</h1>
+          <p class="page-subtitle">Track dispatches, verify cash-on-delivery orders, and update status</p>
+        </div>
+      </div>
+
+      <div id="status-banner"></div>
+
+      <div class="filter-tabs">
+        <button class="tab-btn active" data-status="">All Orders</button>
+        <button class="tab-btn" data-status="pending">Pending</button>
+        <button class="tab-btn" data-status="confirmed">Confirmed</button>
+        <button class="tab-btn" data-status="shipped">Shipped</button>
+        <button class="tab-btn" data-status="delivered">Delivered</button>
+        <button class="tab-btn" data-status="cancelled">Cancelled</button>
+      </div>
+
+      <div class="card" style="padding:0;overflow:hidden;">
+        <div class="table-wrap">
+          <table style="width:100%;border-collapse:collapse;text-align:left;">
+            <thead>
+              <tr style="background:var(--color-cream);border-bottom:1px solid var(--color-border);">
+                <th style="padding:12px 16px;font-size:0.8rem;letter-spacing:0.05em;color:var(--color-muted);">ORDER #</th>
+                <th style="padding:12px 16px;font-size:0.8rem;letter-spacing:0.05em;color:var(--color-muted);">DATE</th>
+                <th style="padding:12px 16px;font-size:0.8rem;letter-spacing:0.05em;color:var(--color-muted);">CUSTOMER</th>
+                <th style="padding:12px 16px;font-size:0.8rem;letter-spacing:0.05em;color:var(--color-muted);">PHONE</th>
+                <th style="padding:12px 16px;font-size:0.8rem;letter-spacing:0.05em;color:var(--color-muted);">TOTAL</th>
+                <th style="padding:12px 16px;font-size:0.8rem;letter-spacing:0.05em;color:var(--color-muted);">STATUS</th>
+                <th style="padding:12px 16px;font-size:0.8rem;letter-spacing:0.05em;color:var(--color-muted);text-align:right;">ACTION</th>
+              </tr>
+            </thead>
+            <tbody id="orders-tbody">
+              <tr><td colspan="7" style="text-align:center;padding:32px;color:var(--color-muted);">Loading orders…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
   </div>
 
   <script type="module">
-    import { api, initStatusBanner, toast, formatPrice } from '/admin/js/api.js';
+    import { api, initStatusBanner, toast, formatPrice } from './js/api.js';
 
     initStatusBanner();
+
+    // Mobile Sidebar toggle
+    const menuBtn = document.getElementById('mobile-menu-btn');
+    const sidebar = document.getElementById('admin-sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+    function toggleSidebar() {
+      sidebar.classList.toggle('open');
+      overlay.classList.toggle('visible');
+    }
+    if (menuBtn) menuBtn.addEventListener('click', toggleSidebar);
+    if (overlay) overlay.addEventListener('click', toggleSidebar);
 
     let currentStatus = '';
 
     async function loadOrders() {
       const tbody = document.getElementById('orders-tbody');
-      tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--color-muted);">Loading…</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--color-muted);">Loading orders…</td></tr>';
 
       try {
         const res = await api.orders.list(currentStatus ? { status: currentStatus } : {});
@@ -83,40 +142,46 @@
 
         tbody.innerHTML = '';
         if (!orders.length) {
-          tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--color-muted); padding: 2rem;">No orders found.</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--color-muted);">No orders found.</td></tr>';
           return;
         }
 
         for (const o of orders) {
           const tr = document.createElement('tr');
+          tr.style.borderBottom = '1px solid var(--color-border-light)';
 
           const tdNum = document.createElement('td');
+          tdNum.style.padding = '12px 16px';
+          tdNum.style.fontWeight = '600';
           tdNum.textContent = o.order_number ? `#${o.order_number}` : (o.client_ref ? o.client_ref.slice(0, 8) : 'Offline');
           if (o._source === 'offline') {
-            const badge = document.createElement('small');
-            badge.textContent = ' (offline)';
-            badge.style.color = '#a05c00';
-            tdNum.appendChild(badge);
+            tdNum.innerHTML += ` <span style="font-size:0.7rem;color:var(--color-warning);">(offline)</span>`;
           }
           tr.appendChild(tdNum);
 
           const tdDate = document.createElement('td');
+          tdDate.style.padding = '12px 16px';
           tdDate.textContent = o.created_at ? new Date(o.created_at).toLocaleDateString('en-GB') : '—';
           tr.appendChild(tdDate);
 
           const tdCust = document.createElement('td');
+          tdCust.style.padding = '12px 16px';
           tdCust.textContent = o.customer_name || o.name || '—';
           tr.appendChild(tdCust);
 
           const tdPhone = document.createElement('td');
+          tdPhone.style.padding = '12px 16px';
           tdPhone.textContent = o.customer_phone || o.phone || '—';
           tr.appendChild(tdPhone);
 
           const tdTotal = document.createElement('td');
+          tdTotal.style.padding = '12px 16px';
+          tdTotal.style.fontWeight = '600';
           tdTotal.textContent = formatPrice(o.total);
           tr.appendChild(tdTotal);
 
           const tdStatus = document.createElement('td');
+          tdStatus.style.padding = '12px 16px';
           const span = document.createElement('span');
           const st = o.status || 'pending';
           span.className = `badge badge-${st}`;
@@ -125,17 +190,15 @@
           tr.appendChild(tdStatus);
 
           const tdAction = document.createElement('td');
-          const a = document.createElement('a');
-          a.href = `/admin/order.html?id=${o.id || o.client_ref}`;
-          a.textContent = 'View Details';
-          a.style.textDecoration = 'underline';
-          tdAction.appendChild(a);
+          tdAction.style.padding = '12px 16px';
+          tdAction.style.textAlign = 'right';
+          tdAction.innerHTML = `<a href="./order.html?id=${o.id || o.client_ref}" class="btn btn-sm btn-secondary">View Order</a>`;
           tr.appendChild(tdAction);
 
           tbody.appendChild(tr);
         }
       } catch (e) {
-        toast(`Failed to load orders: ${e.message}`, 'error');
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--color-muted);">No live orders loaded yet.</td></tr>';
       }
     }
 

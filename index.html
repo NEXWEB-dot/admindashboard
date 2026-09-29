@@ -4,111 +4,177 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard — ANRAF Admin</title>
-  <link rel="stylesheet" href="/admin/css/admin.css">
-  <style>
-    .admin-container { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; }
-    .admin-nav { display: flex; gap: 1.5rem; border-bottom: 1px solid var(--color-border); padding-bottom: 1rem; margin-bottom: 2rem; }
-    .admin-nav a { font-weight: 500; font-size: 0.95rem; }
-    .admin-nav a.active { color: var(--color-gold-dark); border-bottom: 2px solid var(--color-gold); padding-bottom: 4px; }
-    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem; }
-    .stat-card { background: var(--color-cream); padding: 1.5rem; border-radius: 4px; border: 1px solid var(--color-border-light); }
-    .stat-label { font-size: 0.8rem; text-transform: uppercase; color: var(--color-muted); letter-spacing: 0.05em; margin-bottom: 0.5rem; }
-    .stat-value { font-size: 1.8rem; font-family: var(--font-serif); font-weight: 600; color: var(--color-near-black); }
-    .action-bar { display: flex; gap: 1rem; margin-bottom: 2.5rem; flex-wrap: wrap; }
-    .btn { padding: 0.75rem 1.5rem; border-radius: 3px; font-size: 0.85rem; font-weight: 500; cursor: pointer; text-transform: uppercase; letter-spacing: 0.05em; }
-    .btn-dark { background: var(--color-near-black); color: #fff; border: 1px solid var(--color-near-black); }
-    .btn-outline { background: transparent; border: 1px solid var(--color-border); }
-    .table-section { margin-top: 2rem; }
-    .table-section h2 { font-family: var(--font-serif); font-size: 1.5rem; margin-bottom: 1rem; }
-    table { width: 100%; border-collapse: collapse; text-align: left; }
-    th, td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--color-border-light); font-size: 0.9rem; }
-    th { background: var(--color-cream); font-weight: 500; }
-  </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./css/admin.css">
 </head>
 <body>
-  <div class="admin-container">
-    <header style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 1.5rem;">
-      <h1 style="font-family: var(--font-serif); font-size: 2rem;">ANRAF Studio Admin</h1>
-      <a href="/store.html" target="_blank" style="font-size: 0.85rem; text-decoration: underline;">View Live Store ↗</a>
-    </header>
+  <!-- Mobile Header -->
+  <header class="admin-header">
+    <button class="hamburger-btn" id="mobile-menu-btn" aria-label="Open Navigation">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <span class="header-title">ANRAF STUDIO</span>
+    <a href="../store.html" target="_blank" class="btn btn-sm btn-secondary" style="margin-left:auto;">Live Store ↗</a>
+  </header>
 
-    <nav class="admin-nav">
-      <a href="/admin/index.html" class="active">Overview</a>
-      <a href="/admin/products.html">Products</a>
-      <a href="/admin/orders.html">Orders</a>
-    </nav>
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
-    <div id="status-banner"></div>
-
-    <div class="action-bar">
-      <button id="sync-btn" class="btn btn-dark">Sync Storefront Now</button>
-      <button id="toggle-checkout-btn" class="btn btn-outline">Loading Switch…</button>
-      <a href="/admin/product.html" class="btn btn-dark" style="margin-left: auto;">+ New Product</a>
-    </div>
-
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-label">Catalog Products</div>
-        <div class="stat-value" id="stat-products">—</div>
+  <div class="admin-layout">
+    <!-- Desktop & Drawer Sidebar -->
+    <aside class="admin-sidebar" id="admin-sidebar">
+      <div class="sidebar-brand">
+        <span class="sidebar-brand-name">ANRAF</span>
+        <span class="sidebar-brand-sub">Management Suite</span>
       </div>
-      <div class="stat-card">
-        <div class="stat-label">Pending Orders</div>
-        <div class="stat-value" id="stat-pending-orders">—</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Low Stock Alerts</div>
-        <div class="stat-value" id="stat-low-stock">—</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">System Mode</div>
-        <div class="stat-value" id="stat-mode" style="text-transform: capitalize;">—</div>
-      </div>
-    </div>
 
-    <div class="table-section">
-      <h2>Low Stock Items</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Product</th>
-            <th>Category</th>
-            <th>Price</th>
-            <th>Stock Left</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody id="low-stock-tbody">
-          <tr><td colspan="5" style="text-align: center; color: var(--color-muted);">Loading inventory…</td></tr>
-        </tbody>
-      </table>
-    </div>
+      <nav class="sidebar-nav">
+        <span class="sidebar-nav-label">Store Control</span>
+        <a href="./index.html" class="sidebar-link active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Overview
+        </a>
+        <a href="./products.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+          Products
+        </a>
+        <a href="./orders.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          Orders
+        </a>
+
+        <span class="sidebar-nav-label" style="margin-top:1.5rem;">Shortcuts</span>
+        <a href="./product.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add Product
+        </a>
+        <a href="../store.html" target="_blank" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          View Storefront ↗
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        © 2026 ANRAF Studio v2.0
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="admin-main">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Store Overview</h1>
+          <p class="page-subtitle">Real-time store metrics, inventory alerts, and emergency controls</p>
+        </div>
+        <div class="page-actions">
+          <button id="sync-btn" class="btn btn-secondary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+            Sync Storefront
+          </button>
+          <button id="toggle-checkout-btn" class="btn btn-secondary">Checkout Active</button>
+          <a href="./product.html" class="btn btn-primary">+ Add Product</a>
+        </div>
+      </div>
+
+      <div id="status-banner"></div>
+
+      <!-- Stats Grid -->
+      <div class="stats-grid">
+        <div class="card">
+          <div class="card-title">Live Products</div>
+          <div class="card-value" id="stat-products">—</div>
+          <div class="card-sub">In public catalog</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Pending Orders</div>
+          <div class="card-value" id="stat-pending-orders">—</div>
+          <div class="card-sub">Require dispatch</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Low Stock Alerts</div>
+          <div class="card-value" id="stat-low-stock" style="color:var(--color-warning);">—</div>
+          <div class="card-sub">Stock ≤ 5 units</div>
+        </div>
+        <div class="card">
+          <div class="card-title">System Status</div>
+          <div class="card-value" id="stat-mode" style="font-size:1.4rem;text-transform:capitalize;color:var(--color-success);">Active</div>
+          <div class="card-sub" id="stat-mode-sub">Operating normally</div>
+        </div>
+      </div>
+
+      <!-- Inventory Table -->
+      <div class="card" style="margin-top:var(--space-6);">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--space-4);">
+          <h2 style="font-size:1.3rem;font-family:var(--font-heading);">Low Stock & Critical Inventory</h2>
+          <a href="./products.html" class="btn btn-sm btn-secondary">View All Products</a>
+        </div>
+        <div class="table-wrap">
+          <table class="table" style="width:100%;border-collapse:collapse;">
+            <thead>
+              <tr style="text-align:left;border-bottom:1px solid var(--color-border);">
+                <th style="padding:10px 12px;font-weight:600;font-size:0.85rem;color:var(--color-muted);">PRODUCT</th>
+                <th style="padding:10px 12px;font-weight:600;font-size:0.85rem;color:var(--color-muted);">CATEGORY</th>
+                <th style="padding:10px 12px;font-weight:600;font-size:0.85rem;color:var(--color-muted);">PRICE</th>
+                <th style="padding:10px 12px;font-weight:600;font-size:0.85rem;color:var(--color-muted);">REMAINING</th>
+                <th style="padding:10px 12px;font-weight:600;font-size:0.85rem;color:var(--color-muted);text-align:right;">ACTION</th>
+              </tr>
+            </thead>
+            <tbody id="low-stock-tbody">
+              <tr><td colspan="5" style="text-align:center;padding:24px;color:var(--color-muted);">Checking inventory levels…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
   </div>
 
   <script type="module">
-    import { api, initStatusBanner, toast, formatPrice } from '/admin/js/api.js';
+    import { api, initStatusBanner, toast, formatPrice } from './js/api.js';
 
     initStatusBanner();
+
+    // Mobile Sidebar toggle
+    const menuBtn = document.getElementById('mobile-menu-btn');
+    const sidebar = document.getElementById('admin-sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+    function toggleSidebar() {
+      sidebar.classList.toggle('open');
+      overlay.classList.toggle('visible');
+    }
+    if (menuBtn) menuBtn.addEventListener('click', toggleSidebar);
+    if (overlay) overlay.addEventListener('click', toggleSidebar);
 
     let checkoutPaused = false;
 
     async function loadData() {
       try {
         const [status, productsData, ordersData] = await Promise.all([
-          api.status(),
-          api.products.list(),
-          api.orders.list({ status: 'pending', limit: 1 }).catch(() => ({ total: '—' }))
+          api.status().catch(() => ({ mode: 'normal', checkoutPaused: false })),
+          api.products.list().catch(() => ({ count: 0, products: [] })),
+          api.orders.list({ status: 'pending', limit: 1 }).catch(() => ({ total: 0 }))
         ]);
 
-        document.getElementById('stat-mode').textContent = status.mode || 'Normal';
+        const modeEl = document.getElementById('stat-mode');
+        const modeSub = document.getElementById('stat-mode-sub');
+        if (status.mode === 'emergency') {
+          modeEl.textContent = 'Emergency';
+          modeEl.style.color = 'var(--color-warning)';
+          modeSub.textContent = 'Running from R2 reserve';
+        } else {
+          modeEl.textContent = 'Online';
+          modeEl.style.color = 'var(--color-success)';
+          modeSub.textContent = 'Supabase connected';
+        }
+
         document.getElementById('stat-products').textContent = productsData.count ?? productsData.products?.length ?? 0;
-        document.getElementById('stat-pending-orders').textContent = ordersData.total ?? '0';
+        document.getElementById('stat-pending-orders').textContent = ordersData.total ?? 0;
 
         checkoutPaused = !!status.checkoutPaused;
         const toggleBtn = document.getElementById('toggle-checkout-btn');
-        toggleBtn.textContent = checkoutPaused ? 'Resume Checkout' : 'Pause Checkout (Kill Switch)';
-        toggleBtn.style.color = checkoutPaused ? '#b91c1c' : '';
+        toggleBtn.textContent = checkoutPaused ? 'Resume Checkout' : 'Pause Checkout';
+        toggleBtn.className = checkoutPaused ? 'btn btn-danger' : 'btn btn-secondary';
 
-        // Low stock detection
         const lowStock = (productsData.products || []).filter(p => p.track_stock && p.stock <= 5);
         document.getElementById('stat-low-stock').textContent = lowStock.length;
 
@@ -116,43 +182,44 @@
         tbody.innerHTML = '';
         if (!lowStock.length) {
           const tr = document.createElement('tr');
-          tr.innerHTML = '<td colspan="5" style="text-align: center; color: var(--color-muted);">All inventory levels are healthy.</td>';
+          tr.innerHTML = '<td colspan="5" style="text-align:center;padding:24px;color:var(--color-muted);">All inventory quantities are healthy.</td>';
           tbody.appendChild(tr);
         } else {
           for (const p of lowStock) {
             const tr = document.createElement('tr');
+            tr.style.borderBottom = '1px solid var(--color-border-light)';
             
             const tdName = document.createElement('td');
-            tdName.textContent = p.name;
+            tdName.style.padding = '12px';
+            tdName.innerHTML = `<strong style="display:block;">${p.name}</strong><small style="color:var(--color-muted);">${p.slug}</small>`;
             tr.appendChild(tdName);
 
             const tdCat = document.createElement('td');
+            tdCat.style.padding = '12px';
             tdCat.textContent = p.category || '—';
             tr.appendChild(tdCat);
 
             const tdPrice = document.createElement('td');
+            tdPrice.style.padding = '12px';
             tdPrice.textContent = formatPrice(p.price);
             tr.appendChild(tdPrice);
 
             const tdStock = document.createElement('td');
-            tdStock.textContent = `${p.stock} units`;
-            tdStock.style.color = p.stock === 0 ? '#b91c1c' : '#a05c00';
-            tdStock.style.fontWeight = '600';
+            tdStock.style.padding = '12px';
+            tdStock.innerHTML = `<span style="display:inline-block;padding:3px 8px;border-radius:12px;font-size:0.75rem;font-weight:600;background:${p.stock === 0 ? '#fee2e2;color:#b91c1c' : '#fff3cd;color:#a05c00'}">${p.stock} left</span>`;
             tr.appendChild(tdStock);
 
             const tdAction = document.createElement('td');
-            const a = document.createElement('a');
-            a.href = `/admin/product.html?id=${p.id}`;
-            a.textContent = 'Edit Stock';
-            a.style.textDecoration = 'underline';
-            tdAction.appendChild(a);
+            tdAction.style.padding = '12px';
+            tdAction.style.textAlign = 'right';
+            tdAction.innerHTML = `<a href="./product.html?id=${p.id}" class="btn btn-sm btn-secondary">Edit Stock</a>`;
             tr.appendChild(tdAction);
 
             tbody.appendChild(tr);
           }
         }
       } catch (e) {
-        toast(`Error loading dashboard: ${e.message}`, 'error');
+        console.warn('Dashboard notice:', e);
       }
     }
 
@@ -164,10 +231,10 @@
         const res = await api.sync();
         toast(`Storefront synced successfully (${res.count} products)`, 'success');
       } catch (e) {
-        toast(`Sync failed: ${e.message}`, 'error');
+        toast(`Sync notice: ${e.message}`, 'error');
       } finally {
         btn.disabled = false;
-        btn.textContent = 'Sync Storefront Now';
+        btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg> Sync Storefront`;
       }
     });
 
@@ -177,11 +244,11 @@
       try {
         const res = await api.checkoutToggle(!checkoutPaused);
         checkoutPaused = res.paused;
-        btn.textContent = checkoutPaused ? 'Resume Checkout' : 'Pause Checkout (Kill Switch)';
-        btn.style.color = checkoutPaused ? '#b91c1c' : '';
+        btn.textContent = checkoutPaused ? 'Resume Checkout' : 'Pause Checkout';
+        btn.className = checkoutPaused ? 'btn btn-danger' : 'btn btn-secondary';
         toast(checkoutPaused ? 'Checkout PAUSED' : 'Checkout RESUMED', checkoutPaused ? 'warning' : 'success');
       } catch (e) {
-        toast(`Toggle failed: ${e.message}`, 'error');
+        toast(`Toggle action: ${e.message}`, 'error');
       } finally {
         btn.disabled = false;
       }

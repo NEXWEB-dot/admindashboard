@@ -4,109 +4,177 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Order Detail — ANRAF Admin</title>
-  <link rel="stylesheet" href="/admin/css/admin.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./css/admin.css">
   <style>
-    .admin-container { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem; }
-    .order-grid { display: grid; grid-template-columns: 1fr; gap: 2rem; margin-top: 1.5rem; }
-    @media (min-width: 768px) {
-      .order-grid { grid-template-columns: 2fr 1.2fr; }
-    }
-    .panel { background: var(--color-cream); border: 1px solid var(--color-border-light); padding: 1.5rem; border-radius: 4px; margin-bottom: 1.5rem; }
-    .panel h2 { font-family: var(--font-serif); font-size: 1.3rem; margin-bottom: 1rem; border-bottom: 1px solid var(--color-border); padding-bottom: 0.5rem; }
-    .meta-row { display: flex; justify-content: space-between; margin-bottom: 0.75rem; font-size: 0.9rem; }
+    .order-layout { display: grid; grid-template-columns: 1fr; gap: var(--space-6); }
+    @media (min-width: 900px) { .order-layout { grid-template-columns: 1.8fr 1.2fr; } }
+    .meta-row { display: flex; justify-content: space-between; margin-bottom: var(--space-3); font-size: 0.9rem; border-bottom: 1px dashed var(--color-border-light); padding-bottom: var(--space-2); }
     .meta-label { color: var(--color-muted); }
     .meta-val { font-weight: 500; }
-    .status-actions { display: flex; flex-direction: column; gap: 0.75rem; margin-top: 1.5rem; }
-    .btn { padding: 0.75rem 1.25rem; border-radius: 3px; font-size: 0.85rem; font-weight: 500; cursor: pointer; text-transform: uppercase; letter-spacing: 0.05em; border: none; text-align: center; }
-    .btn-confirm { background: #2e7d4f; color: #fff; }
-    .btn-ship { background: #0369a1; color: #fff; }
-    .btn-deliver { background: #1a1a18; color: #fff; }
-    .btn-cancel { background: #b91c1c; color: #fff; }
-    .btn-wa { background: #25D366; color: #fff; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; margin-top: 0.5rem; text-decoration: none; }
-    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-    th, td { padding: 0.75rem 0.5rem; border-bottom: 1px solid var(--color-border); font-size: 0.9rem; text-align: left; }
   </style>
 </head>
 <body>
-  <div class="admin-container">
-    <a href="/admin/orders.html" style="font-size: 0.85rem; text-decoration: underline; margin-bottom: 1rem; display: inline-block;">← Back to Orders</a>
-    <h1 id="order-heading" style="font-family: var(--font-serif); font-size: 2rem;">Order Details</h1>
+  <!-- Mobile Header -->
+  <header class="admin-header">
+    <button class="hamburger-btn" id="mobile-menu-btn" aria-label="Open Navigation">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <span class="header-title">ORDER DETAILS</span>
+    <a href="../store.html" target="_blank" class="btn btn-sm btn-secondary" style="margin-left:auto;">Live Store ↗</a>
+  </header>
 
-    <div id="status-banner"></div>
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
-    <div class="order-grid">
-      <div>
-        <div class="panel">
-          <h2>Items Ordered</h2>
-          <table>
-            <thead>
-              <tr>
-                <th>Item</th>
-                <th>Qty</th>
-                <th>Price</th>
-                <th style="text-align: right;">Total</th>
-              </tr>
-            </thead>
-            <tbody id="items-tbody">
-              <tr><td colspan="4" style="text-align: center;">Loading items…</td></tr>
-            </tbody>
-            <tfoot>
-              <tr>
-                <td colspan="3" style="text-align: right; font-weight: 600; padding-top: 1rem;">Total Amount:</td>
-                <td id="order-total" style="text-align: right; font-weight: 600; padding-top: 1rem;">—</td>
-              </tr>
-            </tfoot>
-          </table>
-        </div>
+  <div class="admin-layout">
+    <!-- Sidebar -->
+    <aside class="admin-sidebar" id="admin-sidebar">
+      <div class="sidebar-brand">
+        <span class="sidebar-brand-name">ANRAF</span>
+        <span class="sidebar-brand-sub">Management Suite</span>
+      </div>
 
-        <div class="panel">
-          <h2>Order Notes</h2>
-          <p id="order-notes" style="font-size: 0.95rem; color: #4a4a46; font-style: italic;">No notes provided.</p>
+      <nav class="sidebar-nav">
+        <span class="sidebar-nav-label">Store Control</span>
+        <a href="./index.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Overview
+        </a>
+        <a href="./products.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+          Products
+        </a>
+        <a href="./orders.html" class="sidebar-link active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          Orders
+        </a>
+
+        <span class="sidebar-nav-label" style="margin-top:1.5rem;">Shortcuts</span>
+        <a href="./product.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add Product
+        </a>
+        <a href="../store.html" target="_blank" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          View Storefront ↗
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        © 2026 ANRAF Studio v2.0
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="admin-main">
+      <div class="page-header">
+        <div>
+          <a href="./orders.html" style="font-size:0.85rem;color:var(--color-muted);display:inline-block;margin-bottom:var(--space-2);">← Back to Orders List</a>
+          <h1 class="page-title" id="order-heading">Order Inspection</h1>
+          <p class="page-subtitle">Verify items, delivery address, and trigger state transitions</p>
         </div>
       </div>
 
-      <div>
-        <div class="panel">
-          <h2>Customer Details</h2>
-          <div class="meta-row">
-            <span class="meta-label">Customer:</span>
-            <span class="meta-val" id="cust-name">—</span>
+      <div id="status-banner"></div>
+
+      <div class="order-layout">
+        <!-- Left: Items & Notes -->
+        <div style="display:flex;flex-direction:column;gap:var(--space-5);">
+          <div class="card">
+            <h2 style="font-size:1.1rem;font-family:var(--font-heading);margin-bottom:var(--space-4);">Ordered Garments</h2>
+            <div class="table-wrap">
+              <table style="width:100%;border-collapse:collapse;text-align:left;">
+                <thead>
+                  <tr style="border-bottom:1px solid var(--color-border);background:var(--color-cream);">
+                    <th style="padding:10px 12px;font-size:0.8rem;color:var(--color-muted);">ITEM</th>
+                    <th style="padding:10px 12px;font-size:0.8rem;color:var(--color-muted);">QTY</th>
+                    <th style="padding:10px 12px;font-size:0.8rem;color:var(--color-muted);">UNIT PRICE</th>
+                    <th style="padding:10px 12px;font-size:0.8rem;color:var(--color-muted);text-align:right;">SUBTOTAL</th>
+                  </tr>
+                </thead>
+                <tbody id="items-tbody">
+                  <tr><td colspan="4" style="text-align:center;padding:24px;color:var(--color-muted);">Loading items…</td></tr>
+                </tbody>
+                <tfoot>
+                  <tr style="border-top:2px solid var(--color-near-black);">
+                    <td colspan="3" style="padding:14px 12px;font-weight:600;font-size:1rem;text-align:right;">Total Order Amount:</td>
+                    <td id="order-total" style="padding:14px 12px;font-weight:700;font-size:1.15rem;text-align:right;color:var(--color-gold-dark);">—</td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
           </div>
-          <div class="meta-row">
-            <span class="meta-label">Phone:</span>
-            <span class="meta-val" id="cust-phone">—</span>
+
+          <div class="card">
+            <h2 style="font-size:1.1rem;font-family:var(--font-heading);margin-bottom:var(--space-3);">Order Instructions / Notes</h2>
+            <p id="order-notes" style="font-size:0.95rem;color:var(--color-mid);font-style:italic;line-height:1.5;">No specific notes provided by customer.</p>
           </div>
-          <div class="meta-row" style="flex-direction: column; gap: 0.25rem;">
-            <span class="meta-label">Address:</span>
-            <span class="meta-val" id="cust-addr" style="line-height: 1.4;">—</span>
-          </div>
-          <a id="wa-btn" href="#" target="_blank" class="btn btn-wa">Open WhatsApp Chat</a>
         </div>
 
-        <div class="panel">
-          <h2>Order Status & Workflow</h2>
-          <div class="meta-row">
-            <span class="meta-label">Current Status:</span>
-            <span class="meta-val" id="current-status" style="text-transform: uppercase;">—</span>
+        <!-- Right: Customer Info & Status Action -->
+        <div style="display:flex;flex-direction:column;gap:var(--space-5);">
+          <div class="card">
+            <h2 style="font-size:1.1rem;font-family:var(--font-heading);margin-bottom:var(--space-4);">Customer Information</h2>
+            
+            <div class="meta-row">
+              <span class="meta-label">Full Name</span>
+              <span class="meta-val" id="cust-name">—</span>
+            </div>
+            <div class="meta-row">
+              <span class="meta-label">Phone</span>
+              <span class="meta-val" id="cust-phone">—</span>
+            </div>
+            <div style="margin-top:var(--space-3);margin-bottom:var(--space-4);">
+              <span class="meta-label" style="display:block;margin-bottom:4px;font-size:0.8rem;text-transform:uppercase;">Delivery Address</span>
+              <div class="meta-val" id="cust-addr" style="line-height:1.5;background:var(--color-cream);padding:10px;border-radius:var(--radius-sm);font-size:0.9rem;">—</div>
+            </div>
+
+            <a id="wa-btn" href="#" target="_blank" class="btn btn-whatsapp" style="width:100%;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.669-.699c.969.53 1.771.815 2.791.815 3.179 0 5.767-2.587 5.768-5.766 0-3.18-2.588-5.766-5.768-5.766zm9.969 5.766c0 5.503-4.477 9.98-9.97 9.98-1.745 0-3.38-.453-4.81-1.246l-5.22 1.368 1.393-5.093c-.911-1.498-1.393-3.218-1.393-5.009 0-5.503 4.478-9.98 9.97-9.98 5.493 0 9.97 4.477 9.97 9.98z"/></svg>
+              Verify on WhatsApp
+            </a>
           </div>
-          <div id="workflow-buttons" class="status-actions">
-            <!-- Buttons rendered based on status transitions -->
+
+          <div class="card">
+            <h2 style="font-size:1.1rem;font-family:var(--font-heading);margin-bottom:var(--space-4);">Order Lifecycle</h2>
+            
+            <div class="meta-row">
+              <span class="meta-label">Current State</span>
+              <span class="meta-val" id="current-status" style="text-transform:uppercase;font-weight:700;">—</span>
+            </div>
+
+            <div id="workflow-buttons" style="display:flex;flex-direction:column;gap:var(--space-2);margin-top:var(--space-4);">
+              <!-- Rendered status buttons -->
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </main>
   </div>
 
   <script type="module">
-    import { api, initStatusBanner, toast, confirm, formatPrice } from '/admin/js/api.js';
+    import { api, initStatusBanner, toast, confirm, formatPrice } from './js/api.js';
 
     initStatusBanner();
+
+    // Mobile Sidebar toggle
+    const menuBtn = document.getElementById('mobile-menu-btn');
+    const sidebar = document.getElementById('admin-sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+    function toggleSidebar() {
+      sidebar.classList.toggle('open');
+      overlay.classList.toggle('visible');
+    }
+    if (menuBtn) menuBtn.addEventListener('click', toggleSidebar);
+    if (overlay) overlay.addEventListener('click', toggleSidebar);
 
     const orderId = new URLSearchParams(location.search).get('id');
     let currentOrder = null;
 
     async function loadOrder() {
-      if (!orderId) { window.location.href = '/admin/orders.html'; return; }
+      if (!orderId) { window.location.href = './orders.html'; return; }
       try {
         const res = await api.orders.list();
         const orders = res.orders || [];
@@ -129,28 +197,28 @@
 
         document.getElementById('current-status').textContent = currentOrder.status || 'pending';
 
-        // Render items
         const tbody = document.getElementById('items-tbody');
         tbody.innerHTML = '';
         const items = currentOrder.order_items || currentOrder.items || [];
         for (const it of items) {
           const tr = document.createElement('tr');
-          const name = it.product_name || it.name || 'Unknown item';
+          tr.style.borderBottom = '1px solid var(--color-border-light)';
+          const name = it.product_name || it.name || 'Garment item';
           const qty = it.quantity || it.qty || 1;
           const price = it.price_at_purchase || it.price || 0;
 
           tr.innerHTML = `
-            <td>${name}</td>
-            <td>${qty}</td>
-            <td>${formatPrice(price)}</td>
-            <td style="text-align: right;">${formatPrice(price * qty)}</td>
+            <td style="padding:12px;"><strong>${name}</strong></td>
+            <td style="padding:12px;">× ${qty}</td>
+            <td style="padding:12px;">${formatPrice(price)}</td>
+            <td style="padding:12px;text-align:right;font-weight:500;">${formatPrice(price * qty)}</td>
           `;
           tbody.appendChild(tr);
         }
 
         renderWorkflow();
       } catch (e) {
-        toast(`Error loading order: ${e.message}`, 'error');
+        toast(`Order notice: ${e.message}`, 'error');
       }
     }
 
@@ -162,7 +230,7 @@
         const p = document.createElement('p');
         p.textContent = 'This order was captured in offline reserve. Status changes will be unlocked once replayed into the database.';
         p.style.fontSize = '0.85rem';
-        p.style.color = '#a05c00';
+        p.style.color = 'var(--color-warning)';
         container.appendChild(p);
         return;
       }
@@ -170,19 +238,19 @@
       const st = currentOrder.status || 'pending';
 
       if (st === 'pending') {
-        createBtn('Confirm Order', 'btn-confirm', () => updateStatus('confirmed'));
-        createBtn('Cancel Order', 'btn-cancel', () => updateStatus('cancelled', true));
+        createBtn('Confirm Order', 'btn-primary', () => updateStatus('confirmed'));
+        createBtn('Cancel Order', 'btn-danger', () => updateStatus('cancelled', true));
       } else if (st === 'confirmed') {
-        createBtn('Mark as Shipped', 'btn-ship', () => updateStatus('shipped'));
-        createBtn('Cancel Order', 'btn-cancel', () => updateStatus('cancelled', true));
+        createBtn('Mark Shipped', 'btn-primary', () => updateStatus('shipped'));
+        createBtn('Cancel Order', 'btn-danger', () => updateStatus('cancelled', true));
       } else if (st === 'shipped') {
-        createBtn('Mark as Delivered', 'btn-deliver', () => updateStatus('delivered'));
-        createBtn('Cancel Order', 'btn-cancel', () => updateStatus('cancelled', true));
+        createBtn('Mark Delivered', 'btn-primary', () => updateStatus('delivered'));
+        createBtn('Cancel Order', 'btn-danger', () => updateStatus('cancelled', true));
       } else {
         const p = document.createElement('p');
-        p.textContent = `Order is ${st}. No further status transitions allowed.`;
+        p.textContent = `Order is ${st}. Lifecycle complete.`;
         p.style.fontSize = '0.85rem';
-        p.style.color = '#787870';
+        p.style.color = 'var(--color-muted)';
         container.appendChild(p);
       }
     }
@@ -192,6 +260,7 @@
       const b = document.createElement('button');
       b.className = `btn ${className}`;
       b.textContent = text;
+      b.style.width = '100%';
       b.addEventListener('click', onClick);
       container.appendChild(b);
     }
@@ -207,7 +276,7 @@
         toast(`Order status updated to ${newStatus}`, 'success');
         loadOrder();
       } catch (err) {
-        toast(`Status update failed: ${err.message}`, 'error');
+        toast(`Status update: ${err.message}`, 'error');
       }
     }
 

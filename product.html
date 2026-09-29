@@ -4,122 +4,204 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Product Editor — ANRAF Admin</title>
-  <link rel="stylesheet" href="/admin/css/admin.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./css/admin.css">
   <style>
-    .admin-container { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem; }
-    .form-grid { display: grid; grid-template-columns: 1fr; gap: 1.5rem; margin-top: 1.5rem; }
-    @media (min-width: 768px) {
-      .form-grid { grid-template-columns: 2fr 1fr; }
-    }
-    .form-group { margin-bottom: 1.25rem; }
-    label { display: block; font-size: 0.8rem; text-transform: uppercase; font-weight: 500; letter-spacing: 0.05em; margin-bottom: 0.4rem; }
-    input[type="text"], input[type="number"], select, textarea {
-      width: 100%; padding: 0.75rem; border: 1px solid var(--color-border); border-radius: 4px; font-size: 0.95rem;
-    }
+    .form-layout { display: grid; grid-template-columns: 1fr; gap: var(--space-6); }
+    @media (min-width: 900px) { .form-layout { grid-template-columns: 2fr 1fr; } }
     .image-dropzone {
-      border: 2px dashed var(--color-border); padding: 2rem; text-align: center; border-radius: 4px; cursor: pointer; background: var(--color-cream);
-      margin-bottom: 1.5rem;
+      border: 2px dashed var(--color-border); padding: var(--space-6); text-align: center; border-radius: var(--radius); cursor: pointer; background: var(--color-cream);
+      transition: border-color var(--transition);
     }
-    .images-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 1rem; margin-top: 1rem; }
-    .image-item { position: relative; aspect-ratio: 3/4; border: 1px solid var(--color-border); border-radius: 4px; overflow: hidden; }
+    .image-dropzone:hover { border-color: var(--color-gold); }
+    .images-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: var(--space-3); margin-top: var(--space-4); }
+    .image-item { position: relative; aspect-ratio: 3/4; border: 1px solid var(--color-border); border-radius: var(--radius-sm); overflow: hidden; background: #fff; }
     .image-item img { width: 100%; height: 100%; object-fit: cover; }
-    .image-remove { position: absolute; top: 4px; right: 4px; background: rgba(185, 28, 28, 0.85); color: #fff; border: none; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; line-height: 1; }
-    .btn { padding: 0.75rem 1.75rem; border-radius: 3px; font-size: 0.9rem; font-weight: 500; cursor: pointer; text-transform: uppercase; letter-spacing: 0.05em; }
-    .btn-dark { background: var(--color-near-black); color: #fff; border: 1px solid var(--color-near-black); }
+    .image-remove { position: absolute; top: 6px; right: 6px; background: rgba(185, 28, 28, 0.85); color: #fff; border: none; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; line-height: 1; display:flex; align-items:center; justify-content:center; }
   </style>
 </head>
 <body>
-  <div class="admin-container">
-    <a href="/admin/products.html" style="font-size: 0.85rem; text-decoration: underline; margin-bottom: 1rem; display: inline-block;">← Back to Products</a>
-    <h1 id="page-title" style="font-family: var(--font-serif); font-size: 2rem;">Add New Product</h1>
+  <!-- Mobile Header -->
+  <header class="admin-header">
+    <button class="hamburger-btn" id="mobile-menu-btn" aria-label="Open Navigation">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <span class="header-title">PRODUCT EDITOR</span>
+    <a href="../store.html" target="_blank" class="btn btn-sm btn-secondary" style="margin-left:auto;">Live Store ↗</a>
+  </header>
 
-    <div id="status-banner"></div>
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
-    <form id="product-form">
-      <div class="form-grid">
+  <div class="admin-layout">
+    <!-- Sidebar -->
+    <aside class="admin-sidebar" id="admin-sidebar">
+      <div class="sidebar-brand">
+        <span class="sidebar-brand-name">ANRAF</span>
+        <span class="sidebar-brand-sub">Management Suite</span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <span class="sidebar-nav-label">Store Control</span>
+        <a href="./index.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Overview
+        </a>
+        <a href="./products.html" class="sidebar-link active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+          Products
+        </a>
+        <a href="./orders.html" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          Orders
+        </a>
+
+        <span class="sidebar-nav-label" style="margin-top:1.5rem;">Shortcuts</span>
+        <a href="./product.html" class="sidebar-link active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add Product
+        </a>
+        <a href="../store.html" target="_blank" class="sidebar-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          View Storefront ↗
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        © 2026 ANRAF Studio v2.0
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="admin-main">
+      <div class="page-header">
         <div>
-          <div class="form-group">
-            <label for="name">Product Name *</label>
-            <input type="text" id="name" required placeholder="e.g. Embroidered Lawn Suit — Noir">
-          </div>
-
-          <div class="form-group">
-            <label for="slug">Slug (URL Keyword) *</label>
-            <input type="text" id="slug" required placeholder="e.g. embroidered-lawn-suit-noir">
-          </div>
-
-          <div class="form-group">
-            <label for="description">Description</label>
-            <textarea id="description" rows="6" placeholder="Fabric details, embroidery specifications, care instructions…"></textarea>
-          </div>
-
-          <div class="form-group">
-            <label>Product Images (Up to 10)</label>
-            <div class="image-dropzone" id="dropzone">
-              <p>Drag & drop images here or <u>browse files</u></p>
-              <small style="color: var(--color-muted);">PNG, JPEG, WebP. Converted automatically to optimized WebP.</small>
-              <input type="file" id="file-input" multiple accept="image/*" style="display: none;">
-            </div>
-            <div class="images-grid" id="images-preview"></div>
-          </div>
-        </div>
-
-        <div>
-          <div class="form-group">
-            <label for="price">Price (PKR) *</label>
-            <input type="number" id="price" required min="0" step="1" placeholder="12500">
-          </div>
-
-          <div class="form-group">
-            <label for="compare_at_price">Compare-at Price (Original/Was)</label>
-            <input type="number" id="compare_at_price" min="0" step="1" placeholder="15000">
-          </div>
-
-          <div class="form-group">
-            <label for="category">Category</label>
-            <input type="text" id="category" list="category-suggestions" placeholder="e.g. Lawn, Embroidery, Heritage">
-            <datalist id="category-suggestions">
-              <option value="Lawn">
-              <option value="Embroidery">
-              <option value="Heritage">
-            </datalist>
-          </div>
-
-          <div class="form-group" style="margin-top: 1.5rem; background: var(--color-cream); padding: 1rem; border-radius: 4px;">
-            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-              <input type="checkbox" id="in_stock" checked>
-              <span>In Stock (Available for purchase)</span>
-            </label>
-          </div>
-
-          <div class="form-group" style="background: var(--color-cream); padding: 1rem; border-radius: 4px;">
-            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; margin-bottom: 0.5rem;">
-              <input type="checkbox" id="track_stock">
-              <span>Track Exact Inventory Units</span>
-            </label>
-            <div id="stock-container" style="display: none; margin-top: 0.75rem;">
-              <label for="stock">Available Quantity</label>
-              <input type="number" id="stock" min="0" value="0">
-            </div>
-          </div>
-
-          <div class="form-group" style="background: var(--color-cream); padding: 1rem; border-radius: 4px;">
-            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-              <input type="checkbox" id="is_active" checked>
-              <span>Publish to Storefront</span>
-            </label>
-          </div>
-
-          <button type="submit" id="save-btn" class="btn btn-dark" style="width: 100%; margin-top: 1rem;">Save Product</button>
+          <a href="./products.html" style="font-size:0.85rem;color:var(--color-muted);display:inline-block;margin-bottom:var(--space-2);">← Back to Products Catalog</a>
+          <h1 class="page-title" id="page-title">Add New Product</h1>
+          <p class="page-subtitle">Configure pricing, garment details, and high-res imagery</p>
         </div>
       </div>
-    </form>
+
+      <div id="status-banner"></div>
+
+      <form id="product-form">
+        <div class="form-layout">
+          <!-- Main Details -->
+          <div style="display:flex;flex-direction:column;gap:var(--space-5);">
+            <div class="card">
+              <h2 style="font-size:1.1rem;font-family:var(--font-heading);margin-bottom:var(--space-4);">Garment Information</h2>
+              
+              <div style="margin-bottom:var(--space-4);">
+                <label for="name" style="display:block;font-size:0.8rem;text-transform:uppercase;font-weight:600;letter-spacing:0.05em;margin-bottom:6px;">Product Name *</label>
+                <input type="text" id="name" required placeholder="e.g. Noir Floral Embroidered Lawn Suit" style="width:100%;padding:10px 14px;border:1px solid var(--color-border);border-radius:var(--radius);font-size:0.95rem;">
+              </div>
+
+              <div style="margin-bottom:var(--space-4);">
+                <label for="slug" style="display:block;font-size:0.8rem;text-transform:uppercase;font-weight:600;letter-spacing:0.05em;margin-bottom:6px;">SEO Slug (URL identifier) *</label>
+                <input type="text" id="slug" required placeholder="noir-floral-embroidered-lawn-suit" style="width:100%;padding:10px 14px;border:1px solid var(--color-border);border-radius:var(--radius);font-size:0.95rem;">
+              </div>
+
+              <div>
+                <label for="description" style="display:block;font-size:0.8rem;text-transform:uppercase;font-weight:600;letter-spacing:0.05em;margin-bottom:6px;">Fabric & Design Description</label>
+                <textarea id="description" rows="6" placeholder="Describe the shirt embroidery, dupatta fabric, trouser details, and washing instructions…" style="width:100%;padding:10px 14px;border:1px solid var(--color-border);border-radius:var(--radius);font-size:0.95rem;line-height:1.5;"></textarea>
+              </div>
+            </div>
+
+            <!-- Imagery -->
+            <div class="card">
+              <h2 style="font-size:1.1rem;font-family:var(--font-heading);margin-bottom:var(--space-2);">Garment Photoshoot Images</h2>
+              <p style="font-size:0.82rem;color:var(--color-muted);margin-bottom:var(--space-4);">Images are automatically compressed to WebP and thumbnailed on upload.</p>
+              
+              <div class="image-dropzone" id="dropzone">
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin:0 auto var(--space-2);color:var(--color-gold);"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                <p style="font-weight:500;font-size:0.95rem;">Drag & drop images here, or <u>click to browse</u></p>
+                <small style="color:var(--color-muted);">JPG, PNG, WebP up to 5MB each (Max 10 images)</small>
+                <input type="file" id="file-input" multiple accept="image/*" style="display: none;">
+              </div>
+              <div class="images-grid" id="images-preview"></div>
+            </div>
+          </div>
+
+          <!-- Side controls (Pricing & Inventory) -->
+          <div style="display:flex;flex-direction:column;gap:var(--space-5);">
+            <div class="card">
+              <h2 style="font-size:1.1rem;font-family:var(--font-heading);margin-bottom:var(--space-4);">Pricing</h2>
+              <div style="margin-bottom:var(--space-4);">
+                <label for="price" style="display:block;font-size:0.8rem;text-transform:uppercase;font-weight:600;letter-spacing:0.05em;margin-bottom:6px;">Retail Price (PKR) *</label>
+                <input type="number" id="price" required min="0" step="1" placeholder="12500" style="width:100%;padding:10px 14px;border:1px solid var(--color-border);border-radius:var(--radius);font-size:1.1rem;font-weight:600;">
+              </div>
+              <div>
+                <label for="compare_at_price" style="display:block;font-size:0.8rem;text-transform:uppercase;font-weight:600;letter-spacing:0.05em;margin-bottom:6px;">Original/Struck-off Price (Optional)</label>
+                <input type="number" id="compare_at_price" min="0" step="1" placeholder="15000" style="width:100%;padding:10px 14px;border:1px solid var(--color-border);border-radius:var(--radius);font-size:0.95rem;">
+              </div>
+            </div>
+
+            <div class="card">
+              <h2 style="font-size:1.1rem;font-family:var(--font-heading);margin-bottom:var(--space-4);">Category & Organization</h2>
+              <div>
+                <label for="category" style="display:block;font-size:0.8rem;text-transform:uppercase;font-weight:600;letter-spacing:0.05em;margin-bottom:6px;">Collection / Category</label>
+                <input type="text" id="category" list="category-suggestions" placeholder="e.g. Lawn, Embroidery, Heritage" style="width:100%;padding:10px 14px;border:1px solid var(--color-border);border-radius:var(--radius);font-size:0.95rem;">
+                <datalist id="category-suggestions">
+                  <option value="Lawn">
+                  <option value="Embroidery">
+                  <option value="Heritage">
+                  <option value="Ready to Wear">
+                </datalist>
+              </div>
+            </div>
+
+            <div class="card">
+              <h2 style="font-size:1.1rem;font-family:var(--font-heading);margin-bottom:var(--space-4);">Inventory Status</h2>
+              
+              <div style="margin-bottom:var(--space-3);">
+                <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+                  <input type="checkbox" id="in_stock" checked style="width:18px;height:18px;">
+                  <span style="font-weight:500;">In Stock (Available)</span>
+                </label>
+              </div>
+
+              <div style="margin-bottom:var(--space-3);padding-top:var(--space-2);border-top:1px solid var(--color-border-light);">
+                <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+                  <input type="checkbox" id="track_stock" style="width:18px;height:18px;">
+                  <span style="font-weight:500;">Track Exact Inventory Units</span>
+                </label>
+                <div id="stock-container" style="display:none;margin-top:var(--space-3);padding-left:28px;">
+                  <label for="stock" style="display:block;font-size:0.75rem;text-transform:uppercase;color:var(--color-muted);margin-bottom:4px;">Available Units</label>
+                  <input type="number" id="stock" min="0" value="10" style="width:100px;padding:6px 10px;border:1px solid var(--color-border);border-radius:var(--radius);font-size:0.95rem;">
+                </div>
+              </div>
+
+              <div style="padding-top:var(--space-2);border-top:1px solid var(--color-border-light);">
+                <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+                  <input type="checkbox" id="is_active" checked style="width:18px;height:18px;">
+                  <span style="font-weight:500;">Publish to Live Storefront</span>
+                </label>
+              </div>
+            </div>
+
+            <button type="submit" id="save-btn" class="btn btn-gold" style="width:100%;padding:14px;font-size:1rem;">Save Product</button>
+          </div>
+        </div>
+      </form>
+    </main>
   </div>
 
   <script type="module">
-    import { api, slugify, toWebP, initStatusBanner, toast } from '/admin/js/api.js';
+    import { api, slugify, toWebP, initStatusBanner, toast } from './js/api.js';
 
     initStatusBanner();
+
+    // Mobile Sidebar toggle
+    const menuBtn = document.getElementById('mobile-menu-btn');
+    const sidebar = document.getElementById('admin-sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+    function toggleSidebar() {
+      sidebar.classList.toggle('open');
+      overlay.classList.toggle('visible');
+    }
+    if (menuBtn) menuBtn.addEventListener('click', toggleSidebar);
+    if (overlay) overlay.addEventListener('click', toggleSidebar);
 
     const productId = new URLSearchParams(location.search).get('id');
     let images = [];
@@ -141,11 +223,11 @@
 
     async function loadProduct() {
       if (!productId) return;
-      document.getElementById('page-title').textContent = 'Edit Product';
+      document.getElementById('page-title').textContent = 'Edit Garment Product';
       try {
         const snap = await api.products.list();
         const p = (snap.products || []).find(item => item.id === productId);
-        if (!p) throw new Error('Product not found in snapshot');
+        if (!p) throw new Error('Product not found');
 
         nameInput.value = p.name || '';
         slugInput.value = p.slug || '';
@@ -162,7 +244,7 @@
         images = p.images || [];
         renderImages();
       } catch (e) {
-        toast(`Error loading product: ${e.message}`, 'error');
+        toast(`Notice: ${e.message}`, 'error');
       }
     }
 
@@ -191,13 +273,12 @@
       });
     }
 
-    // Image upload handling
     const dropzone = document.getElementById('dropzone');
     const fileInput = document.getElementById('file-input');
 
     dropzone.addEventListener('click', () => fileInput.click());
     fileInput.addEventListener('change', handleFiles);
-    dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.style.borderColor = '#000'; });
+    dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.style.borderColor = 'var(--color-gold)'; });
     dropzone.addEventListener('dragleave', () => { dropzone.style.borderColor = ''; });
     dropzone.addEventListener('drop', (e) => {
       e.preventDefault();
@@ -209,7 +290,7 @@
       const files = Array.from(e.target.files);
       if (!files.length) return;
 
-      toast(`Processing ${files.length} images…`, 'info');
+      toast(`Optimizing ${files.length} image(s)…`, 'info');
       for (const file of files) {
         if (images.length >= 10) {
           toast('Maximum 10 images allowed per product', 'warning');
@@ -226,7 +307,6 @@
       }
     }
 
-    // Form submit
     document.getElementById('product-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const saveBtn = document.getElementById('save-btn');
@@ -255,15 +335,15 @@
           res = await api.products.create(payload);
         }
 
-        if (res.mode === 'emergency') {
+        if (res && res.mode === 'emergency') {
           toast('Saved in Emergency Mode (R2 updated; will sync when DB returns)', 'warning', 6000);
         } else {
           toast('Product saved successfully!', 'success');
         }
 
-        setTimeout(() => { window.location.href = '/admin/products.html'; }, 1000);
+        setTimeout(() => { window.location.href = './products.html'; }, 1000);
       } catch (err) {
-        toast(`Save error: ${err.message}`, 'error');
+        toast(`Save notice: ${err.message}`, 'error');
         saveBtn.disabled = false;
         saveBtn.textContent = 'Save Product';
       }
